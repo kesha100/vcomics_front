@@ -145,7 +145,7 @@ const ImageGallery: React.FC = () => {
               </button>
               <button
                 className="absolute bottom-4 right-4 bg-white text-[#1E0018] px-3 py-1 rounded-lg shadow-md hover:bg-gray-200"
-                onClick={() => handleDownload(selectedImage)}
+                onClick={() => handleDownload()}
               >
                 Download
               </button>
