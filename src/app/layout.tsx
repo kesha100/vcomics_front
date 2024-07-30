@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { fontAdventure } from "@/lib/fonts";
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,9 +19,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>Next.js</title>
+      </head>
       <body className={cn("", fontAdventure.variable)}>
-        {children}
+        {children} 
+        <Analytics />
       </body>
     </html>
   );
+  
 }
