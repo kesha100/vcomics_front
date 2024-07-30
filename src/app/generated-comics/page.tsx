@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -16,22 +17,20 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const ImageGallery: React.FC = () => {
+const GeneratedComics: React.FC = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-
-  const imageUrls = [
-    "https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-2-1721936551298",
-    // 'https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-4-1721936550824',
-    "https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-6-1721936551247",
-    "https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-10-1721936554814",
-    "https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-8-1721936556771",
-    "https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-11-1721936557770",
-    "https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-5-1721936557956",
-    // Add more URLs as needed
-  ];
-
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const panelImageUrlsParam = searchParams.get("panelImageUrls");
+    if (panelImageUrlsParam) {
+      const urls = JSON.parse(panelImageUrlsParam);
+      setImageUrls(urls);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!api) {
@@ -46,8 +45,9 @@ const ImageGallery: React.FC = () => {
   }, [api]);
 
   const handleDownload = () => {
-    console.log({ current });
-    // window.open(imageUrl, "_blank");
+    if (imageUrls[current - 1]) {
+      window.open(imageUrls[current - 1], "_blank");
+    }
   };
 
   const handleImageClick = (imageUrl: string) => {
@@ -61,7 +61,7 @@ const ImageGallery: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[url('/background.png')] bg-bottom bg-repeat-x">
       <header className="flex items-center justify-between px-6 h-14 bg-[#1E0018]">
-        <a href="#" className="text-white font-bold text-xl">
+        <a href="/" className="text-white font-bold text-xl">
           VCOMICS
         </a>
         <a href="#" className="text-white hover:underline">
@@ -72,63 +72,66 @@ const ImageGallery: React.FC = () => {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-adventure uppercase text-[#1E0018]">
-          Image Gallery
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-adventure uppercase text-[#1E0018] mb-8">
+          Your Generated Comics
         </h1>
 
-        <Carousel
-          setApi={setApi}
-          className="w-full max-w-md flex flex-col gap-2"
-        >
-          {/* <div className="absolute -inset-4 bg-cover bg-center bg-[url('/comics-background.png')]"></div> */}
-          <CarouselContent>
-            {imageUrls.map((url, index) => (
-              <CarouselItem key={index}>
-                <div className="flex flex-col gap-2">
-                  <Card className="relative">
-                    <div className="aspect-square">
-                      <Image
-                        src={url}
-                        alt=""
-                        className="object-cover z-10"
-                        width={1024}
-                        height={1024}
-                      />
-                    </div>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <button
-            className="px-3 relative py-2 shadow-md text-white text-lg bg-[#BB1215] hover:bg-[#BB1215]/80 font-adventure stroke-black stroke-2"
-            onClick={() => handleDownload()}
+        {imageUrls.length > 0 ? (
+          <Carousel
+            setApi={setApi}
+            className="w-full max-w-md flex flex-col gap-2"
           >
-            <Image
-              src="/button-background.png"
-              alt=""
-              className="object-cover absolute inset-0"
-              fill
-            />
-            <span className="relative">Download</span>
-          </button>
-          <div className="relative flex items-center gap-2">
-            <CarouselPrevious
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "flex-1 text-white bg-[#BB1215] hover:bg-[#BB1215]/80 rounded-none hover:text-white"
-              )}
-            />
-            <CarouselNext
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "flex-1 text-white bg-[#BB1215] hover:bg-[#BB1215]/80 rounded-none hover:text-white"
-              )}
-            />
-          </div>
-        </Carousel>
+            <CarouselContent>
+              {imageUrls.map((url, index) => (
+                <CarouselItem key={index}>
+                  <div className="flex flex-col gap-2">
+                    <Card className="relative">
+                      <div className="aspect-square">
+                        <Image
+                          src={url}
+                          alt={`Comic panel ${index + 1}`}
+                          className="object-cover z-10 cursor-pointer"
+                          width={1024}
+                          height={1024}
+                          onClick={() => handleImageClick(url)}
+                        />
+                      </div>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <button
+              className="px-3 relative py-2 shadow-md text-white text-lg bg-[#BB1215] hover:bg-[#BB1215]/80 font-adventure stroke-black stroke-2"
+              onClick={handleDownload}
+            >
+              <Image
+                src="/button-background.png"
+                alt=""
+                className="object-cover absolute inset-0"
+                fill
+              />
+              <span className="relative">Download Current Panel</span>
+            </button>
+            <div className="relative flex items-center gap-2">
+              <CarouselPrevious
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "flex-1 text-white bg-[#BB1215] hover:bg-[#BB1215]/80 rounded-none hover:text-white"
+                )}
+              />
+              <CarouselNext
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "flex-1 text-white bg-[#BB1215] hover:bg-[#BB1215]/80 rounded-none hover:text-white"
+                )}
+              />
+            </div>
+          </Carousel>
+        ) : (
+          <p className="text-[#1E0018] text-xl">No comic panels generated yet.</p>
+        )}
 
-        {/* Modal for displaying selected image */}
         {selectedImage && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="max-w-screen-lg w-full mx-auto rounded-lg overflow-hidden shadow-lg relative">
@@ -145,7 +148,7 @@ const ImageGallery: React.FC = () => {
               </button>
               <button
                 className="absolute bottom-4 right-4 bg-white text-[#1E0018] px-3 py-1 rounded-lg shadow-md hover:bg-gray-200"
-                onClick={() => handleDownload()}
+                onClick={() => window.open(selectedImage, "_blank")}
               >
                 Download
               </button>
@@ -153,12 +156,14 @@ const ImageGallery: React.FC = () => {
           </div>
         )}
 
-        <Link href="/loading" passHref>
-          <button className="mt-8 text-[#1E018]">Back to Upload Page</button>
+        <Link href="/" passHref>
+          <button className="mt-8 text-[#1E018] hover:underline">
+            Back to Upload Page
+          </button>
         </Link>
       </main>
     </div>
   );
 };
 
-export default ImageGallery;
+export default GeneratedComics;

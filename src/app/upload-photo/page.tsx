@@ -7,6 +7,7 @@ export default function UploadPhoto() {
   const [inputText, setInputText] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,28 +32,31 @@ export default function UploadPhoto() {
     if (uploadedFile) formData.append("image", uploadedFile);
 
     try {
-      const response = await fetch('http://localhost:8000/comics/create-comic', {
-        method: 'POST',
+      setIsLoading(true); // Set loading state to true
+      const response = await fetch("https://vcomicsbackend-production.up.railway.app/comics/create-comic", {
+        method: "POST",
         body: formData,
       });
 
       if (response.ok) {
-      const data = await response.json();
-      const panelImageUrls = data.panels.panelImageUrls; // Corrected line
-      const queryString = new URLSearchParams({
-        panelImageUrls: JSON.stringify(panelImageUrls),
-      }).toString();
+        const data = await response.json();
+        const panelImageUrls = data.panels.panelImageUrls; // Corrected line
+        const queryString = new URLSearchParams({
+          panelImageUrls: JSON.stringify(panelImageUrls),
+        }).toString();
 
-      // Redirect to /generated-comics with the panelImageUrls as query parameters
-      router.push(`/generated-comics?${queryString}`);
-    } else {
-      setErrorMessage("Failed to create comic. Please try again.");
+        // Redirect to /generated-comics with the panelImageUrls as query parameters
+        router.push(`/generated-comics?${queryString}`);
+      } else {
+        setErrorMessage("Failed to create comic. Please try again.");
+        setIsLoading(false); // Set loading state to false
+      }
+    } catch (error) {
+      console.error("Error creating comic:", error);
+      setErrorMessage("An error occurred. Please try again.");
+      setIsLoading(false); // Set loading state to false
     }
-  } catch (error) {
-    console.error('Error creating comic:', error);
-    setErrorMessage("An error occurred. Please try again.");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[url('/background.png')] bg-bottom bg-repeat-x">
@@ -116,6 +120,7 @@ export default function UploadPhoto() {
           </button>
         </div>
         {errorMessage && <p className="mt-4 text-red-500">{errorMessage}</p>}
+        {isLoading && <p className="mt-4 text-[#1E0018]">Loading...</p>}
         <p className="mt-4 text-[#BB1215]">
           Important:{" "}
           <span className="text-[#1E0018]">You can upload only one image!</span>
