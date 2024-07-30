@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function UploadPhoto() {
   const [inputText, setInputText] = useState<string>("");
@@ -9,6 +10,7 @@ export default function UploadPhoto() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
+  const sendButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -22,9 +24,23 @@ export default function UploadPhoto() {
   };
 
   const handleSubmit = async () => {
+    if (isLoading) return;
     if (!inputText && !uploadedFile) {
       setErrorMessage("Please enter text or upload a photo.");
       return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage("");
+
+    // Add button click animation
+    if (sendButtonRef.current) {
+      sendButtonRef.current.classList.add("scale-90");
+      setTimeout(() => {
+        if (sendButtonRef.current) {
+          sendButtonRef.current.classList.remove("scale-90");
+        }
+      }, 150);
     }
 
     const formData = new FormData();
@@ -32,7 +48,6 @@ export default function UploadPhoto() {
     if (uploadedFile) formData.append("image", uploadedFile);
 
     try {
-      setIsLoading(true); // Set loading state to true
       const response = await fetch("https://vcomicsbackend-production.up.railway.app/comics/create-comic", {
         method: "POST",
         body: formData,
@@ -40,21 +55,21 @@ export default function UploadPhoto() {
 
       if (response.ok) {
         const data = await response.json();
-        const panelImageUrls = data.panels.panelImageUrls; // Corrected line
+        const panelImageUrls = data.panels.panelImageUrls;
         const queryString = new URLSearchParams({
           panelImageUrls: JSON.stringify(panelImageUrls),
         }).toString();
 
-        // Redirect to /generated-comics with the panelImageUrls as query parameters
+        // Redirect to generated-comics page
         router.push(`/generated-comics?${queryString}`);
       } else {
         setErrorMessage("Failed to create comic. Please try again.");
-        setIsLoading(false); // Set loading state to false
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error creating comic:", error);
       setErrorMessage("An error occurred. Please try again.");
-      setIsLoading(false); // Set loading state to false
+      setIsLoading(false);
     }
   };
 
@@ -64,15 +79,10 @@ export default function UploadPhoto() {
         <a href="#" className="text-white font-bold text-xl">
           VCOMICS
         </a>
-        <a href="#" className="text-white hover:underline">
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12c0 4.99 3.65 9.12 8.4 9.88V15.8h-2.5v-2.8h2.5V10c0-2.54 1.54-3.94 3.8-3.94 1.1 0 2.05.08 2.33.12v2.71h-1.6c-1.26 0-1.5.6-1.5 1.47v1.93h2.92l-.38 2.8h-2.54V22C18.35 21.12 22 16.99 22 12c0-5.52-4.48-10-10-10z" />
-          </svg>
-        </a>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-adventure uppercase text-[#1E0018]">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-adventure uppercase text-[#1E0018] mb-8">
           Tell Your Story Through Comics
         </h1>
         <div className="relative mt-8 w-full max-w-lg">
@@ -83,44 +93,66 @@ export default function UploadPhoto() {
             onChange={(e) => setInputText(e.target.value)}
             rows={1}
             style={{ overflow: "hidden" }}
+            disabled={isLoading}
           />
-          <button className="absolute top-1/2 left-3 transform -translate-y-1/2">
+          <button className="absolute top-1/2 left-3 transform -translate-y-1/2" disabled={isLoading}>
             <label htmlFor="file-upload">
-              <img
+              <Image
                 src="/upload.png"
                 alt="Upload"
-                className="w-7 h-7 cursor-pointer"
+                width={28}
+                height={28}
+                className="cursor-pointer"
               />
               <input
                 id="file-upload"
                 type="file"
                 className="hidden"
                 onChange={handleFileChange}
+                disabled={isLoading}
               />
             </label>
           </button>
           <button
+            ref={sendButtonRef}
             onClick={handleSubmit}
-            className="absolute top-1/2 right-3 transform -translate-y-1/2"
+            className={`absolute top-1/2 right-3 transform -translate-y-1/2 transition-transform duration-150 ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+            disabled={isLoading}
           >
             <svg
-              className="w-6 h-6 text-[#1E018]"
+              className={`w-6 h-6 text-[#1E018] ${isLoading ? 'animate-spin' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              ></path>
+              {isLoading ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path>
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round" 
+                  strokeWidth="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                ></path>
+              )}
             </svg>
           </button>
         </div>
+        {isLoading && (
+          <div className="mt-4 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#BB1215]"></div>
+            <p className="mt-2 text-[#1E0018]">Creating your comic...</p>
+          </div>
+        )}
         {errorMessage && <p className="mt-4 text-red-500">{errorMessage}</p>}
-        {isLoading && <p className="mt-4 text-[#1E0018]">Loading...</p>}
         <p className="mt-4 text-[#BB1215]">
           Important:{" "}
           <span className="text-[#1E0018]">You can upload only one image!</span>
@@ -134,7 +166,7 @@ export default function UploadPhoto() {
                 {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
               </p>
             </div>
-            <button onClick={handleRemoveFile} className="ml-4 text-[#BB1215]">
+            <button onClick={handleRemoveFile} className="ml-4 text-[#BB1215]" disabled={isLoading}>
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.71a1 1 0 1 0-1.41 1.41L10.59 12l-4.89 4.88a1 1 0 0 0 1.41 1.41L12 13.41l4.88 4.88a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.88a1 1 0 0 0 0-1.41z"></path>
               </svg>
