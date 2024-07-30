@@ -114,7 +114,7 @@ export function MainPage() {
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="/mainpage.jpg"
+                  src="/panel-7.jpeg"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -122,7 +122,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">The Watchmen</div>
+                <div className="font-medium">Парк</div>
                 <div className="text-sm text-muted-foreground">
                   Alan Moore, Dave Gibbons
                 </div>
@@ -131,7 +131,7 @@ export function MainPage() {
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="/mainpage2.png"
+                  src="https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-7-1721936521526"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -139,7 +139,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Maus</div>
+                <div className="font-medium">Garden</div>
                 <div className="text-sm text-muted-foreground">
                   Art Spiegelman
                 </div>
@@ -148,7 +148,7 @@ export function MainPage() {
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="https://comicspanels.s3.eu-central-1.amazonaws.com/panels/panel-8.jpeg"
+                  src="https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-3-1721940428277"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -156,16 +156,16 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Persepolis</div>
+                <div className="font-medium">Honey</div>
                 <div className="text-sm text-muted-foreground">
-                  Marjane Satrapi
+                  Alicia
                 </div>
               </CardFooter>
             </Card>
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="https://comicspanels.s3.eu-central-1.amazonaws.com/panels/panel-3.jpeg"
+                  src="https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-8-1722183635310"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -173,7 +173,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Sandman</div>
+                <div className="font-medium">Мой корги по имени Сэм</div>
                 <div className="text-sm text-muted-foreground">
                   Neil Gaiman, Sam Kieth
                 </div>
