@@ -59,20 +59,22 @@ export default function UploadPhoto() {
         const queryString = new URLSearchParams({
           panelImageUrls: JSON.stringify(panelImageUrls),
         }).toString();
-
+  
         // Redirect to generated-comics page
         router.push(`/generated-comics?${queryString}`);
+      } else if (response.status === 403) {
+        setErrorMessage("You've reached your free comic generation limit. Please try again later.");
       } else {
         setErrorMessage("Failed to create comic. Please try again.");
-        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error creating comic:", error);
       setErrorMessage("An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };
-
+ 
   return (
     <div className="min-h-screen flex flex-col bg-[url('/background.png')] bg-bottom bg-repeat-x">
       <header className="flex items-center justify-between px-6 h-14 bg-[#1E0018]">
