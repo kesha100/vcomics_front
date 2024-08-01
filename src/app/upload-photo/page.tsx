@@ -90,7 +90,7 @@ export default function UploadPhoto() {
         <div className="relative mt-8 w-full max-w-lg">
           <textarea
             className="w-full py-3 pl-12 pr-4 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E0018] shadow-lg resize-none"
-            placeholder="Enter text or upload a photo..."
+            placeholder="Enter your story and upload photo"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             rows={1}
