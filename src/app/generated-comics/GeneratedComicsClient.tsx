@@ -74,9 +74,18 @@ const GeneratedComicsClient: React.FC = () => {
   const createStrip = async (stripImageUrls: string[]): Promise<HTMLCanvasElement> => {
     console.log("Creating strip with URLs:", stripImageUrls);
   
+    // Determine the width and height based on the number of images
+    const numImages = stripImageUrls.length;
+    const columns = 2; // Two images per row
+    const rows = Math.ceil(numImages / columns);
+  
+    // Assuming each image is 1024x1024, calculate canvas size accordingly
+    const canvasWidth = 1024 * columns;
+    const canvasHeight = 1024 * rows;
+  
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
-    canvas.height = 1024;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
     const ctx = canvas.getContext('2d');
   
     if (!ctx) {
@@ -91,17 +100,23 @@ const GeneratedComicsClient: React.FC = () => {
       const loadedImages = await Promise.all(stripImageUrls.map(loadImage)) as HTMLImageElement[];
       console.log("All images loaded successfully");
   
-      const imageWidth = canvas.width / 2;
-      const imageHeight = canvas.height / 2;
-  
       loadedImages.forEach((img, index) => {
-        const x = (index % 2) * imageWidth;
-        const y = Math.floor(index / 2) * imageHeight;
-        ctx.drawImage(img, x, y, imageWidth, imageHeight);
+        const x = (index % columns) * 1024;
+        const y = Math.floor(index / columns) * 1024;
+        ctx.drawImage(img, x, y, 1024, 1024);
         console.log(`Drawn image ${index + 1} at (${x}, ${y})`);
       });
   
-      console.log("All images drawn on canvas");
+      // Draw black dividers
+      ctx.fillStyle = 'black';
+      for (let i = 1; i < columns; i++) {
+        ctx.fillRect(i * 1024, 0, 1, canvas.height); // Vertical dividers
+      }
+      for (let i = 1; i < rows; i++) {
+        ctx.fillRect(0, i * 1024, canvas.width, 1); // Horizontal dividers
+      }
+  
+      console.log("All images drawn on canvas with dividers");
     } catch (error) {
       console.error("Error in createStrip:", error);
       // Draw error message on canvas
@@ -128,19 +143,25 @@ const GeneratedComicsClient: React.FC = () => {
         
         console.log(`Canvas created for strip ${i + 1}. Width: ${canvas.width}, Height: ${canvas.height}`);
   
-        const dataUrl = canvas.toDataURL('image/png');
-        console.log(`Data URL created for strip ${i + 1}. Length: ${dataUrl.length}`);
+        // Use toBlob to ensure high quality
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `comic_strip_${i + 1}.png`;
+            link.click();
+            URL.revokeObjectURL(url);
+          }
+        }, 'image/png', 1.0); // 'image/png' ensures PNG format, 1.0 ensures maximum quality
   
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `comic_strip_${i + 1}.png`;
-        link.click();
         console.log(`Download initiated for strip ${i + 1}`);
       }
     } catch (error) {
       console.error("Error in handleDownloadStrips:", error);
     }
   };
+  
 
   const handleImageClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);

@@ -9,6 +9,7 @@ export default function UploadPhoto() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [language, setLanguage] = useState<string>("english"); // Add this line
   const router = useRouter();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -46,7 +47,8 @@ export default function UploadPhoto() {
     const formData = new FormData();
     if (inputText) formData.append("prompt", inputText);
     if (uploadedFile) formData.append("image", uploadedFile);
-
+    formData.append("language", language); // Add this line
+    
     try {
       const response = await fetch("https://vcomicsbackend-production.up.railway.app/comics/create-comic", {
         method: "POST",
@@ -115,42 +117,62 @@ export default function UploadPhoto() {
               />
             </label>
           </button>
+        </div>
+        
+        {/* New Send Button */}
+        <div className="mt-4 w-full max-w-lg">
           <button
             ref={sendButtonRef}
             onClick={handleSubmit}
-            className={`absolute top-1/2 right-3 transform -translate-y-1/2 transition-transform duration-150 ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className="w-full px-3 py-2 shadow-md text-white text-lg bg-[#BB1215] hover:bg-[#BB1215]/80 font-adventure stroke-black stroke-2 relative"
             disabled={isLoading}
           >
-            <svg
-              className={`w-6 h-6 text-[#1E018] ${isLoading ? 'animate-spin' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <Image
+              src="/button-background.png"
+              alt=""
+              className="object-cover absolute inset-0"
+              fill
+            />
+            <span className="relative">
               {isLoading ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                ></path>
+                <svg
+                  className="w-6 h-6 text-white animate-spin mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  ></path>
+                </svg>
               ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round" 
-                  strokeWidth="2"
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                ></path>
+                "Generate Comic"
               )}
-            </svg>
+            </span>
           </button>
         </div>
+
+        {/* Language selection dropdown */}
+        <div className="mt-4">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="py-2 px-4 border border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E0018] shadow-lg"
+            disabled={isLoading}
+          >
+            <option value="english">English</option>
+            <option value="russian">Russian</option>
+            <option value="kyrgyz">Kyrgyz</option>
+            <option value="kazakh">Kazakh</option>
+          </select>
+        </div>
+
         {isLoading && (
           <div className="mt-4 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#BB1215]"></div>
             <p className="mt-2 text-[#1E0018]">Creating your comic...</p>
           </div>
         )}
