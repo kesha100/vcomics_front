@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 
 const GeneratedComicsClient: React.FC = () => {
   const [api, setApi] = useState<CarouselApi>();
@@ -28,8 +28,9 @@ const GeneratedComicsClient: React.FC = () => {
   useEffect(() => {
     const panelImageUrlsParam = searchParams.get("panelImageUrls");
     if (panelImageUrlsParam) {
-      const urls = JSON.parse(panelImageUrlsParam);
-      setImageUrls(urls);
+      const urls = JSON.parse(panelImageUrlsParam) as string[];
+      const decodedUrls = urls.map((value) => decodeURIComponent(value));
+      setImageUrls(decodedUrls);
     }
   }, [searchParams]);
 
@@ -67,101 +68,113 @@ const GeneratedComicsClient: React.FC = () => {
       const img = new window.Image();
       img.crossOrigin = "anonymous";
       img.onload = () => resolve(img);
-      img.onerror = (e) => reject(new Error(`Failed to load image from ${url}: ${e}`));
+      img.onerror = (e) =>
+        reject(new Error(`Failed to load image from ${url}: ${e}`));
       img.src = url;
     });
   };
-  const createStrip = async (stripImageUrls: string[]): Promise<HTMLCanvasElement> => {
+  const createStrip = async (
+    stripImageUrls: string[]
+  ): Promise<HTMLCanvasElement> => {
     console.log("Creating strip with URLs:", stripImageUrls);
-  
+
     // Determine the width and height based on the number of images
     const numImages = stripImageUrls.length;
     const columns = 2; // Two images per row
     const rows = Math.ceil(numImages / columns);
-  
+
     // Assuming each image is 1024x1024, calculate canvas size accordingly
     const canvasWidth = 1024 * columns;
     const canvasHeight = 1024 * rows;
-  
-    const canvas = document.createElement('canvas');
+
+    const canvas = document.createElement("canvas");
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    const ctx = canvas.getContext('2d');
-  
+    const ctx = canvas.getContext("2d");
+
     if (!ctx) {
       throw new Error("Unable to get 2D context from canvas");
     }
-  
+
     // Fill the background with white
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
+
     try {
-      const loadedImages = await Promise.all(stripImageUrls.map(loadImage)) as HTMLImageElement[];
+      const loadedImages = (await Promise.all(
+        stripImageUrls.map(loadImage)
+      )) as HTMLImageElement[];
       console.log("All images loaded successfully");
-  
+
       loadedImages.forEach((img, index) => {
         const x = (index % columns) * 1024;
         const y = Math.floor(index / columns) * 1024;
         ctx.drawImage(img, x, y, 1024, 1024);
         console.log(`Drawn image ${index + 1} at (${x}, ${y})`);
       });
-  
+
       // Draw black dividers
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = "black";
       for (let i = 1; i < columns; i++) {
         ctx.fillRect(i * 1024, 0, 1, canvas.height); // Vertical dividers
       }
       for (let i = 1; i < rows; i++) {
         ctx.fillRect(0, i * 1024, canvas.width, 1); // Horizontal dividers
       }
-  
+
       console.log("All images drawn on canvas with dividers");
     } catch (error) {
       console.error("Error in createStrip:", error);
       // Draw error message on canvas
-      ctx.fillStyle = 'red';
-      ctx.font = '24px Arial';
-      ctx.fillText('Error creating comic strip', 20, 50);
+      ctx.fillStyle = "red";
+      ctx.font = "24px Arial";
+      ctx.fillText("Error creating comic strip", 20, 50);
     }
-  
+
     return canvas;
   };
-  
+
   const handleDownloadStrips = async () => {
     if (imageUrls.length === 0) return;
-  
+
     console.log("Starting handleDownloadStrips with imageUrls:", imageUrls);
-  
+
     try {
       for (let i = 0; i < Math.ceil(imageUrls.length / 4); i++) {
         const stripImageUrls = imageUrls.slice(i * 4, (i + 1) * 4);
         if (stripImageUrls.length === 0) continue;
-  
+
         console.log(`Creating strip ${i + 1}`);
         const canvas = await createStrip(stripImageUrls);
-        
-        console.log(`Canvas created for strip ${i + 1}. Width: ${canvas.width}, Height: ${canvas.height}`);
-  
+
+        console.log(
+          `Canvas created for strip ${i + 1}. Width: ${canvas.width}, Height: ${
+            canvas.height
+          }`
+        );
+
         // Use toBlob to ensure high quality
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `comic_strip_${i + 1}.png`;
-            link.click();
-            URL.revokeObjectURL(url);
-          }
-        }, 'image/png', 1.0); // 'image/png' ensures PNG format, 1.0 ensures maximum quality
-  
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = `comic_strip_${i + 1}.png`;
+              link.click();
+              URL.revokeObjectURL(url);
+            }
+          },
+          "image/png",
+          1.0
+        ); // 'image/png' ensures PNG format, 1.0 ensures maximum quality
+
         console.log(`Download initiated for strip ${i + 1}`);
       }
     } catch (error) {
       console.error("Error in handleDownloadStrips:", error);
     }
   };
-  
 
   const handleImageClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
