@@ -122,7 +122,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Парк</div>
+                <div className="font-medium">Park</div>
                 <div className="text-sm text-muted-foreground">
                   Alan Moore, Dave Gibbons
                 </div>
@@ -131,7 +131,7 @@ export function MainPage() {
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-7-1721936521526"
+                  src="panel-8.webp"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -139,7 +139,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Garden</div>
+                <div className="font-medium">Besties</div>
                 <div className="text-sm text-muted-foreground">
                   Art Spiegelman
                 </div>
@@ -148,7 +148,7 @@ export function MainPage() {
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-3-1721940428277"
+                  src="panel-6.webp"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -156,7 +156,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Honey</div>
+                <div className="font-medium">Plants</div>
                 <div className="text-sm text-muted-foreground">
                   Alicia
                 </div>
@@ -165,7 +165,7 @@ export function MainPage() {
             <Card>
               <CardContent className="p-0">
                 <img
-                  src="https://jzfstrhyaxuupvfyibws.supabase.co/storage/v1/object/public/vcomics/panel-8-1722183635310"
+                  src="panel-9.webp"
                   width={400}
                   height={400}
                   alt="Comic Cover"
@@ -173,7 +173,7 @@ export function MainPage() {
                 />
               </CardContent>
               <CardFooter className="px-4 py-2 flex flex-col">
-                <div className="font-medium">Мой корги по имени Сэм</div>
+                <div className="font-medium">Study girl</div>
                 <div className="text-sm text-muted-foreground">
                   Neil Gaiman, Sam Kieth
                 </div>
