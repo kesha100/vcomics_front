@@ -195,14 +195,12 @@ const GeneratedComicsClient: React.FC = () => {
                   <div className="flex flex-col gap-2">
                     <Card className="relative">
                       <div className="aspect-square">
-                        <Image
-                          src={url}
-                          alt={`Comic panel ${index + 1}`}
-                          className="object-cover z-10 cursor-pointer"
-                          width={1024}
-                          height={1024}
-                          onClick={() => handleImageClick(url)}
-                        />
+                      <img
+  src={url}
+  alt={`Comic panel ${index + 1}`}
+  className="object-cover z-10 cursor-pointer w-full h-full"
+  onClick={() => handleImageClick(url)}
+/>
                       </div>
                     </Card>
                   </div>

@@ -50,7 +50,7 @@ export default function UploadPhoto() {
     formData.append("language", language); // Add this line
     
     try {
-      const response = await fetch("https://vcomicsbackend-production.up.railway.app/comics/create-comic", {
+      const response = await fetch("https://vcomics.vercel.app/comcis/create-comic", {
         method: "POST",
         body: formData,
       });
