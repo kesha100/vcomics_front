@@ -30,10 +30,10 @@ export default function UploadPhoto() {
       setErrorMessage("Please enter text or upload a photo.");
       return;
     }
-
+  
     setIsLoading(true);
     setErrorMessage("");
-
+  
     // Add button click animation
     if (sendButtonRef.current) {
       sendButtonRef.current.classList.add("scale-90");
@@ -43,39 +43,47 @@ export default function UploadPhoto() {
         }
       }, 150);
     }
-
+  
     const formData = new FormData();
     if (inputText) formData.append("prompt", inputText);
     if (uploadedFile) formData.append("image", uploadedFile);
-    formData.append("language", language); // Add this line
+    formData.append("language", language);
     
     try {
-      // const response = await fetch("https://vcomicsbackend-production.up.railway.app/comics/create-comic", {
-      //   method: "POST",
-      //   body: formData,
-      // });
+      console.log('Sending request to backend...');
       const response = await fetch("https://vcomics-backend-last.onrender.com/comics/create-comic", {
         method: "POST",
         body: formData,
       });
-
+  
+      console.log('Received response from backend:', response);
+  
       if (response.ok) {
         const data = await response.json();
-        const panelImageUrls = data.panels.panelImageUrls;
-        const queryString = new URLSearchParams({
-          panelImageUrls: JSON.stringify(panelImageUrls),
-        }).toString();
+        console.log('Parsed response data:', data);
   
-        // Redirect to generated-comics page
-        router.push(`/generated-comics?${queryString}`);
+        if (data && data.panels && Array.isArray(data.panels.panelImageUrls)) {
+          const panelImageUrls = data.panels.panelImageUrls;
+          const queryString = new URLSearchParams({
+            panelImageUrls: JSON.stringify(panelImageUrls),
+          }).toString();
+  
+          console.log('Redirecting to generated-comics page...');
+          router.push(`/generated-comics?${queryString}`);
+        } else {
+          console.error('Unexpected response structure:', data);
+          setErrorMessage("Unexpected response from server. Please try again.");
+        }
       } else if (response.status === 403) {
         setErrorMessage("You've reached your free comic generation limit. Please try again later.");
       } else {
-        setErrorMessage("Failed to create comic. Please try again.");
+        const errorText = await response.text();
+        console.error('Error response:', response.status, errorText);
+        setErrorMessage(`Failed to create comic. Server responded with status ${response.status}. Please try again.`);
       }
     } catch (error) {
       console.error("Error creating comic:", error);
-      setErrorMessage("An error occurred. Please try again.");
+      setErrorMessage(`An error occurred: ${error}. Please try again.`);
     } finally {
       setIsLoading(false);
     }
