@@ -1,30 +1,39 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const FETCH_TIMEOUT = 60000; // 60 seconds
 
 export default function UploadPhoto() {
   const [inputText, setInputText] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [language, setLanguage] = useState<string>("english"); // Add this line
+  const [language, setLanguage] = useState<string>("english");
   const router = useRouter();
   const sendButtonRef = useRef<HTMLButtonElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        setErrorMessage(`File size exceeds 5MB limit. Please choose a smaller file.`);
+        return;
+      }
       setUploadedFile(file);
+      setErrorMessage("");
     }
-  };
+  }, []);
 
-  const handleRemoveFile = () => {
+  const handleRemoveFile = useCallback(() => {
     setUploadedFile(null);
-  };
+    setErrorMessage("");
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (isLoading) return;
     if (!inputText && !uploadedFile) {
       setErrorMessage("Please enter text or upload a photo.");
@@ -34,14 +43,9 @@ export default function UploadPhoto() {
     setIsLoading(true);
     setErrorMessage("");
   
-    // Add button click animation
     if (sendButtonRef.current) {
       sendButtonRef.current.classList.add("scale-90");
-      setTimeout(() => {
-        if (sendButtonRef.current) {
-          sendButtonRef.current.classList.remove("scale-90");
-        }
-      }, 150);
+      setTimeout(() => sendButtonRef.current?.classList.remove("scale-90"), 150);
     }
   
     const formData = new FormData();
@@ -51,12 +55,17 @@ export default function UploadPhoto() {
     
     try {
       console.log('Sending request to backend...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
       const response = await fetch("https://vcomics-backend-last.onrender.com/comics/create-comic", {
         method: "POST",
         body: formData,
         credentials: 'include',
+        signal: controller.signal,
       });
-  
+
+      clearTimeout(timeoutId);
       console.log('Received response from backend:', response);
   
       if (response.ok) {
@@ -84,12 +93,16 @@ export default function UploadPhoto() {
       }
     } catch (error) {
       console.error("Error creating comic:", error);
-      setErrorMessage(`An error occurred: ${error}. Please try again.`);
+      if (error === 'AbortError') {
+        setErrorMessage("Request timed out. Please try again.");
+      } else {
+        setErrorMessage(`An error occurred: ${error}. Please try again.`);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
- 
+  }, [inputText, uploadedFile, language, router]);
+
   return (
     <div className="min-h-screen flex flex-col bg-[url('/background.png')] bg-bottom bg-repeat-x">
       <header className="flex items-center justify-between px-6 h-14 bg-[#1E0018]">
@@ -132,12 +145,11 @@ export default function UploadPhoto() {
           </button>
         </div>
         
-        {/* New Send Button */}
         <div className="mt-4 w-full max-w-lg">
           <button
             ref={sendButtonRef}
             onClick={handleSubmit}
-            className="w-full px-3 py-2 shadow-md text-white text-lg bg-[#BB1215] hover:bg-[#BB1215]/80 font-adventure stroke-black stroke-2 relative"
+            className="w-full px-3 py-2 shadow-md text-white text-lg bg-[#BB1215] hover:bg-[#BB1215]/80 font-adventure stroke-black stroke-2 relative disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading}
           >
             <Image
@@ -169,7 +181,6 @@ export default function UploadPhoto() {
           </button>
         </div>
 
-        {/* Language selection dropdown */}
         <div className="mt-4">
           <select
             value={language}
@@ -192,7 +203,7 @@ export default function UploadPhoto() {
         {errorMessage && <p className="mt-4 text-red-500">{errorMessage}</p>}
         <p className="mt-4 text-[#BB1215]">
           Important:{" "}
-          <span className="text-[#1E0018]">You can upload only one image!</span>
+          <span className="text-[#1E0018]">You can upload only one image (max 5MB)!</span>
         </p>
         {uploadedFile && (
           <div className="mt-4 flex items-center border border-gray-400 rounded-lg p-2 shadow-lg">
