@@ -54,6 +54,7 @@ export default function UploadPhoto() {
       const response = await fetch("https://vcomics-backend-last.onrender.com/comics/create-comic", {
         method: "POST",
         body: formData,
+        credentials: 'include',
       });
   
       console.log('Received response from backend:', response);
